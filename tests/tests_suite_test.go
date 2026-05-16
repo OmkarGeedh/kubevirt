@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -168,6 +169,17 @@ var _ = ReportAfterSuite("Collect cluster data", func(report Report) {
 })
 
 var _ = ReportAfterSuite("TestTests", func(report Report) {
+	for i := range report.SpecReports {
+		if strings.Contains(report.SpecReports[i].FullText(), "[QUARANTINE]") {
+			continue
+		}
+		for _, label := range report.SpecReports[i].Labels() {
+			if label == "QUARANTINE" {
+				report.SpecReports[i].LeafNodeText += " [QUARANTINE]"
+				break
+			}
+		}
+	}
 	for _, reporter := range afterSuiteReporters {
 		ginkgo_reporters.ReportViaDeprecatedReporter(reporter, report)
 	}
